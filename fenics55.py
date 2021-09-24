@@ -1,10 +1,10 @@
-from fenics import *
+from dolfin import *
 import numpy as np, sklearn.metrics.pairwise as sp
 
 # A 55 LINE TOPOLOGY OPTIMIZATION CODE
 def main(nelx, nely, volfrac, penal, rmin):
-    sigma = lambda _u: 2.0 * mu * sym(grad(_u)) + lmbda * tr(sym(grad(_u))) * Identity(len(_u))
 
+    sigma = lambda _u: 2.0 * mu * sym(grad(_u)) + lmbda * tr(sym(grad(_u))) * Identity(len(_u))
     psi = lambda _u: lmbda / 2 * (tr(sym(grad(_u))) ** 2) + mu * tr(sym(grad(_u)) * sym(grad(_u)))
     xdmf = XDMFFile("output/density.xdmf")
     mu, lmbda = Constant(0.4), Constant(0.6)
@@ -13,7 +13,7 @@ def main(nelx, nely, volfrac, penal, rmin):
     mesh = RectangleMesh(Point(0, 0), Point(nelx, nely), nelx, nely, "right/left")
     U = VectorFunctionSpace(mesh, "P", 1)
     D = FunctionSpace(mesh, "DG", 0)
-    u, v = TrialFunction(U), TestFunction(U)                    
+    u, v = TrialFunction(U), TestFunction(U)
     u_sol, density_old, density = Function(U), Function(D), Function(D, name="density")
     density.vector()[:] = volfrac
 
@@ -61,10 +61,10 @@ def main(nelx, nely, volfrac, penal, rmin):
             l_mid = 0.5 * (l2 + l1)
             density_new = np.maximum(0.001,np.maximum(density.vector()[:] - move, np.minimum(1.0, np.minimum(density.vector()[:] + move, density.vector()[:] * np.sqrt(-sensitivity / l_mid)))))
             l1, l2 = (l_mid, l2) if sum(density_new) - volfrac * mesh.num_cells() > 0 else (l1, l_mid)
-            
         density.vector()[:] = density_new
 
         # PRINT RESULTS
         change = norm(density.vector()-density_old.vector(), norm_type="linf", mesh=mesh)
-        print("it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(loop, sum(objective), sum(density.vector()[:]) / mesh.num_cells(), change))
+        print("it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(loop, sum(objective), sum(
+        density.vector()[:]) / mesh.num_cells(), change))
         xdmf.write(density, loop)
