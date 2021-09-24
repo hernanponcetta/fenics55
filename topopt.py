@@ -61,6 +61,7 @@ def main(nelx, nely, volfrac, penal, rmin):
             l_mid = 0.5 * (l2 + l1)
             density_new = np.maximum(0.001,np.maximum(density.vector()[:] - move, np.minimum(1.0, np.minimum(density.vector()[:] + move, density.vector()[:] * np.sqrt(-sensitivity / l_mid)))))
             l1, l2 = (l_mid, l2) if sum(density_new) - volfrac * mesh.num_cells() > 0 else (l1, l_mid)
+            
         density.vector()[:] = density_new
 
         # PRINT RESULTS
